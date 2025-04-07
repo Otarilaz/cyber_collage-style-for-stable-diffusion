@@ -14,3 +14,153 @@ Installed Python 3.10.6, torch 2.1.2, tokenizers 0.21.1, trained the model for 1
 - **Trigger:** `<cyber_collage>`
 - **File:** `cyber_collage.pt`
 - **Example:** "pc game screen <cyber_collage>"
+
+______
+
+
+Вот подробное описание вашей работы по обучению Textual Inversion в Stable Diffusion WebUI на основе ваших данных, действий и результатов. Оно подходит для использования в README.md на GitHub или как документация вашего процесса.
+Описание работы: Обучение Textual Inversion на собственных изображениях
+Введение
+Я создал кастомную модель Textual Inversion для Stable Diffusion, используя AUTOMATIC1111 WebUI (версия 1.10.1), чтобы внедрить мой уникальный стиль, основанный на собственных изображениях. Обучение проводилось на локальной машине с видеокартой NVIDIA RTX 3050 (6 ГБ VRAM), что потребовало оптимизации процесса из-за ограничений памяти. Ниже описаны все шаги, инструменты и результаты моей работы, включая подготовку данных, настройку WebUI, обучение и публикацию модели.
+Цель
+Целью было натренировать легковесную модель (embedding), которая добавляет мой стиль в генерации Stable Diffusion, и выложить её на GitHub для общего доступа.
+Пошаговый процесс
+1. Подготовка изображений
+
+    Инструменты: Paint (Windows), файловая система.
+    Действия:
+        Собрал набор из 24 собственных изображений, отражающих мой стиль (например, рисунки или фотографии).
+        Открыл каждое изображение в Paint:
+            Обрезал лишние части до квадратной формы (1:1) с помощью инструмента "Обрезка".
+            Изменил размер до 512x512 пикселей через "Изменить размер" → "Пиксели" → 512x512.
+        Сохранил все изображения в формате PNG для высокого качества.
+        Создал папку D:\Sistemnik\cursorprojects\image_generator\my_images и поместил туда подготовленные файлы.
+    Результат: Набор из 24 изображений размером 512x512, готовых для обучения.
+
+2. Установка и настройка Stable Diffusion WebUI
+
+    Инструменты: Командная строка Windows, Python 3.10.6, виртуальное окружение, AUTOMATIC1111 WebUI.
+    Действия:
+        Установил Python 3.10.6 с официального сайта (https://www.python.org), добавив его в PATH.
+        Перешёл в директорию проекта:
+        cmd
+
+        cd /d D:\Sistemnik\cursorprojects\image_generator
+
+        Создал и активировал виртуальное окружение:
+        cmd
+
+        python -m venv venv
+        venv\Scripts\activate
+
+        Установил зависимости из requirements.txt:
+        cmd
+
+        pip install -r requirements.txt
+
+        Установил torch и torchvision с поддержкой CUDA 12.1:
+        cmd
+
+        pip install torch==2.1.2 torchvision==0.16.2 --extra-index-url https://download.pytorch.org/whl/cu121
+
+        Установил предсобранный tokenizers вручную (из-за проблем с компиляцией Rust):
+        cmd
+
+        pip install C:\Users\Одмэн\Downloads\tokenizers-0.21.1-cp310-cp310-win_amd64.whl
+
+    Результат: Рабочая среда с WebUI, совместимая с RTX 3050.
+
+3. Запуск WebUI и настройка обучения
+
+    Инструменты: WebUI, командная строка.
+    Действия:
+        Изначально запускал WebUI с --lowvram, но обучение не поддерживалось:
+        cmd
+
+        python launch.py --lowvram --opt-split-attention
+
+            Получил ошибку: Training models with lowvram not possible.
+        Перезапустил без --lowvram для обучения:
+        cmd
+
+        python launch.py --opt-split-attention
+
+        Открыл интерфейс в браузере: http://127.0.0.1:7860.
+        Перешёл во вкладку "Train" → "Create Embedding".
+        Настроил параметры:
+            Embedding Name: my_style.
+            Initialization Text: mystyle.
+            Training Images Directory: D:\Sistemnik\cursorprojects\image_generator\my_images.
+            Learning Rate: 0.005.
+            Batch Size: 1 (из-за ограничений RTX 3050).
+            Training Steps: 1800 (увеличил с 500 для лучшего качества).
+            Save Every N Steps: 500.
+            Create Image Every N Steps: 200.
+        Нажал "Train Embedding".
+    Результат: Процесс обучения начался, данные успешно обработаны (Preparing dataset... 100%| 24/24).
+
+4. Процесс обучения
+
+    Инструменты: WebUI, RTX 3050.
+    Действия:
+        Следил за прогрессом в консоли:
+            На 1043/1800 шагов (58%) ошибка loss снизилась до 0.073, что указывает на хорошее обучение.
+            Скорость: ~1.5–2.3 с/шаг, итоговое время ~1 час.
+        WebUI автоматически генерировал тестовые изображения каждые 200 шагов (20 шагов за ~17 секунд).
+    Результат: Модель my_style.pt сохранена в D:\Sistemnik_one\cursorprojects\image_generator\embeddings после завершения 1800 шагов.
+
+5. Тестирование модели
+
+    Инструменты: WebUI.
+    Действия:
+        Перезапустил WebUI:
+        cmd
+
+        python launch.py --opt-split-attention
+
+        Вкладка "Textual Inversion" → Нажал "Refresh".
+        Выбрал my_style.pt.
+        Ввёл промпт:"pc game screen <cyber_collage>" → Нажал "Generate".
+    Результат: Сгенерированные изображения отразили стиль моих картинок, что подтвердило успешное обучение.
+
+6. Публикация на GitHub
+
+    Инструменты: Git, командная строка, GitHub.
+    Действия:
+        Установил Git с https://git-scm.com/.
+        Создал локальный репозиторий:
+        cmd
+
+        cd /d D:\Sistemnik\cursorprojects\image_generator
+        mkdir my_style_repo
+        cd my_style_repo
+        git init
+
+
+            Создал README.md в Блокноте:
+
+            # My Custom Style Embedding
+            Textual Inversion для Stable Diffusion, обучено на 24 моих изображениях.
+            - Триггер: <cyber_collage>
+            - Пример: "pc game screen <cyber_collage>"
+            - Шаги: 1800
+            - Loss: 0.073
+            - Оборудование: RTX 3050 (6 ГБ VRAM)
+
+        Закоммитил и отправил на GitHub:
+        cmd
+
+        git add .
+        git commit -m "Моя модель Textual Inversion"
+        git remote add origin https://github.com/Otarilaz/cyber_collage-style-for-stable-diffusion
+        git push -u origin master
+
+    Результат: Модель доступна на GitHub для скачивания и использования.
+
+Итоговые результаты
+
+    Модель: Файл my_style.pt размером ~10–50 КБ, содержащий мой стиль.
+    Качество: Loss 0.073 после 1800 шагов — стиль хорошо интегрирован в генерации.
+    Время: Подготовка (20 минут), обучение (1 час), публикация (~10 минут).
+    Ограничения: RTX 3050 справилась с Textual Inversion при Batch Size 1 и без --lowvram.
+    Ссылка: https://github.com/Otarilaz/cyber_collage-style-for-stable-diffusion
