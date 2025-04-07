@@ -126,17 +126,6 @@ ______
 6. Публикация на GitHub
 
     Инструменты: Git, командная строка, GitHub.
-    Действия:
-        Установил Git с https://git-scm.com/.
-        Создал локальный репозиторий:
-        cmd
-
-        cd /d D:\Sistemnik\cursorprojects\image_generator
-        mkdir my_style_repo
-        cd my_style_repo
-        git init
-
-
             Создал README.md в Блокноте:
 
             # My Custom Style Embedding
